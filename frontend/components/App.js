@@ -24,7 +24,7 @@ export default function App() {
     /* ✨ implement */
     navigate('/')
   }
-  const redirectToArticles = () => { 
+  const redirectToArticles = () => {
     /* ✨ implement */
     navigate('/articles')
   }
@@ -36,7 +36,7 @@ export default function App() {
     // In any case, we should redirect the browser back to the login screen,
     // using the helper above.
     window.localStorage.removeItem('token')
-    
+    setMessage('Goodbye!')
     redirectToLogin()
   }
 
@@ -76,7 +76,6 @@ export default function App() {
     setSpinnerOn(true)
     axiosWithAuth().get(articlesUrl)
       .then(res => {
-        console.log(res)
         setArticles(res.data.articles)
         setMessage(res.data.message)
       })
@@ -93,6 +92,18 @@ export default function App() {
     // The flow is very similar to the `getArticles` function.
     // You'll know what to do! Use log statements or breakpoints
     // to inspect the response from the server.
+    setSpinnerOn(true)
+    axiosWithAuth().post(articlesUrl, article)
+      .then(res => {
+        setArticles([...articles, res.data.article])
+        setMessage(res.data.message)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+      .finally(() => {
+        setSpinnerOn(false)
+      })
   }
 
   const updateArticle = ({ article_id, article }) => {
@@ -124,7 +135,10 @@ export default function App() {
           <Route path="/" element={<LoginForm login={login}/>} />
           <Route path="articles" element={
             <>
-              <ArticleForm />
+              <ArticleForm
+                postArticle={postArticle}
+                article={articles.find(art => art.article_id === currentArticleId)}
+              />
               <Articles 
                 getArticles={getArticles}
                 articles={articles}
