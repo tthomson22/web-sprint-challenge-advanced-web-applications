@@ -109,17 +109,46 @@ export default function App() {
   const updateArticle = ({ article_id, article }) => {
     // ✨ implement
     // You got this!
+    setSpinnerOn(true)
+    axiosWithAuth().put(`${articlesUrl}/${article_id}`, article)
+      .then(res => {
+        setArticles(articles.map(art => {
+          return art.article_id === article_id
+            ? res.data.article
+            : art
+        }))
+        setCurrentArticleId(null)
+        setMessage(res.data.message)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+      .finally(() => {
+        setSpinnerOn(false)
+      })
   }
 
   const deleteArticle = article_id => {
     // ✨ implement
+    setSpinnerOn(true)
+    axiosWithAuth().delete(`${articlesUrl}/${article_id}`)
+      .then(res => {
+        setArticles(articles.filter(art => art.article_id !== article_id))
+        setMessage(res.data.message)
+      })
+      .catch(err => {
+        console.log(err)
+      })
+      .finally(() => {
+        setSpinnerOn(false)
+      })
   }
 
   return (
     // ✨ fix the JSX: `Spinner`, `Message`, `LoginForm`, `ArticleForm` and `Articles` expect props ❗
     <React.StrictMode>
       <Spinner 
-        spinnerOn={spinnerOn}
+        on={spinnerOn}
       />
       <Message 
         message={message}
@@ -137,11 +166,18 @@ export default function App() {
             <>
               <ArticleForm
                 postArticle={postArticle}
-                article={articles.find(art => art.article_id === currentArticleId)}
+                updateArticle={updateArticle}
+                setCurrentArticleId={setCurrentArticleId}
+                currentArticle={articles.find(art => {
+                  art.article_id === currentArticleId
+                })}
               />
               <Articles 
+                setCurrentArticleId={setCurrentArticleId}
+                currentArticleId={currentArticleId}
                 getArticles={getArticles}
                 articles={articles}
+                deleteArticle={deleteArticle}
               />
             </>
           } />
